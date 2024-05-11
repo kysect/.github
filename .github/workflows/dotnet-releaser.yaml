@@ -1,0 +1,52 @@
+on:
+  workflow_call:
+    inputs:
+      runs-on:
+        type: string
+        required: false
+        default: 'ubuntu-latest'
+      dotnet-version:
+        type: string
+        required: false
+        default: '8.0'
+
+    secrets:
+      NUGET_API_KEY:
+        required: true
+
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+jobs:
+  build:
+    runs-on: ${{ inputs.runs-on }}
+
+    permissions:
+      actions: write
+      contents: write
+
+    steps:
+    - name: Checkout main repository
+      uses: actions/checkout@v4
+      with:
+        submodules: true
+        fetch-depth: 0
+
+    - name: Checkout configuration repository
+      uses: actions/checkout@v4
+      with:
+        repository: 'kysect/.github'
+        path: 'kysect-github'
+        ref: 'master'
+        clean: false
+
+    - name: Install dotnet
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ inputs.dotnet-version }}
+
+    - name: Run dotnet-releaser
+      shell: bash
+      run: |
+        dotnet tool install -g dotnet-releaser
+        dotnet-releaser run --nuget-token "${{secrets.NUGET_API_KEY}}"  --github-token "${{secrets.GITHUB_TOKEN}}" Sources/dotnet-releaser.toml
