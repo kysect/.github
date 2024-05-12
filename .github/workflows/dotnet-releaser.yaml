@@ -9,6 +9,10 @@ on:
         type: string
         required: false
         default: '8.0'
+      install-dotnet-aspire:
+        type: boolean
+        required: false
+        default: false
 
     secrets:
       NUGET_API_KEY:
@@ -44,6 +48,10 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ inputs.dotnet-version }}
+
+    - if: ${{ inputs.install-dotnet-aspire == true }}
+      name: Install .NET Aspire workload
+      run: dotnet workload install aspire
 
     - name: Run dotnet-releaser
       shell: bash
