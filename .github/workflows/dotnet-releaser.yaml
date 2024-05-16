@@ -30,6 +30,7 @@ jobs:
       contents: write
 
     steps:
+    - run: git config --global core.autocrlf input
     - name: Checkout main repository
       uses: actions/checkout@v4
       with:
